@@ -1,0 +1,103 @@
+<?php
+// admin.php
+require_once 'config.php';
+
+if(!isset($_SESSION['admin'])) {
+    header("Location: login.php");
+    exit();
+}
+
+// CREATE - Insertar nuevo registro
+if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['crear'])) {
+    $nombre = $_POST['nombre'];
+    $precio = $_POST['precio'];
+    $stock = $_POST['stock'];
+    
+    $sql = "INSERT INTO herramientas (nombre, precio, stock) VALUES (?, ?, ?)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$nombre, $precio, $stock]);
+    $mensaje = "Registro creado exitosamente";
+}
+
+// DELETE - Eliminar registro
+if(isset($_GET['eliminar'])) {
+    $id = $_GET['eliminar'];
+    $sql = "DELETE FROM herramientas WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$id]);
+    $mensaje = "Registro eliminado";
+}
+
+// READ - Obtener todos los registros
+$sql = "SELECT * FROM herramientas ORDER BY id";
+$stmt = $pdo->query($sql);
+$registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Administración</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #007bff; color: white; }
+        .btn-editar { background: #ffc107; color: black; padding: 5px 10px; text-decoration: none; border-radius: 3px; }
+        .btn-eliminar { background: #dc3545; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; }
+        .btn-crear { background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0; }
+        .form-crear { background: #f4f4f4; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
+        .form-crear input { margin: 5px; padding: 8px; }
+        .mensaje { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .logout { float: right; background: #6c757d; color: white; padding: 10px; text-decoration: none; border-radius: 5px; }
+        h2 { display: inline-block; }
+    </style>
+    <script>
+        function confirmarEliminar(id) {
+            return confirm('¿Estás seguro de eliminar el registro ' + id + '? Esta acción no se puede deshacer.');
+        }
+    </script>
+</head>
+<body>
+    <a href="logout.php" class="logout">Cerrar Sesión</a>
+    <h2>Administración de herramienta</h2>
+
+    <?php if(isset($mensaje)): ?>
+        <div class="mensaje"><?php echo $mensaje; ?></div>
+    <?php endif; ?>
+
+    <!-- FORMULARIO CREAR -->
+    <div class="form-crear">
+        <h3>Crear nuevo producto</h3>
+        <form method="POST">
+            <input type="text" name="nombre" placeholder="Nombre" required>
+            <input type="number" step="0.01" name="precio" placeholder="Precio" required>
+            <input type="number" name="stock" placeholder="Stock" required>
+            <button type="submit" name="crear">Guardar</button>
+        </form>
+    </div>
+
+    <!-- TABLA READ -->
+    <h3>Listado de herramientas</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th><th>Nombre</th><th>Código</th><th>Precio</th><th>Stock</th><th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach($registros as $r): ?>
+            <tr>
+                <td><?php echo $r['id']; ?></td>
+                <td><?php echo htmlspecialchars($r['nombre']); ?></td>
+                <td>$<?php echo number_format($r['precio'], 2); ?></td>
+                <td><?php echo $r['stock']; ?></td>
+                <td>
+                    <a href="editar.php?id=<?php echo $r['id']; ?>" class="btn-editar">Editar</a>
+                    <a href="admin.php?eliminar=<?php echo $r['id']; ?>" class="btn-eliminar" onclick="return confirmarEliminar(<?php echo $r['id']; ?>)">Eliminar</a>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</body>
+</html>

@@ -2,7 +2,7 @@
 // config.php
 $host = "localhost";
 $dbname = "truper_diez";
-$username = "dev_user";
+$username = "";
 $password = "dev*26";
 
 try {

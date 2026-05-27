@@ -41,7 +41,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="login-box">
-        <h2>Acceso Administrativo</h2>
+        <h2>Acceso Angel</h2>
         <?php if($error): ?>
             <div class="error"><?php echo $error; ?></div>
         <?php endif; ?>
